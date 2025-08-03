@@ -1,7 +1,7 @@
 import PyQt5, sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton, QVBoxLayout, QWidget
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import *
+from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtCore import *
 
 class browser(QMainWindow):
     def __init__(self):
@@ -16,13 +16,20 @@ class browser(QMainWindow):
         self.inputBar = QLineEdit()
         self.inputBar.returnPressed.connect(self.navigationMethod)
 
-        self.navigationButton = QPushButton("navigate")
-        self.navigationButton.clicked.connect(self.navigationMethod)
+        self.previousButton = QPushButton("Back")
+        self.previousButton.clicked.connect(self.previousPageMethod)
+        self.previousButton.setFixedSize(60, 30)
+
+        self.forwardButton = QPushButton("Forth")
+        self.forwardButton.clicked.connect(self.forthPageMethod)
+        self.forwardButton.setFixedSize(60, 30)
         
-        layout = QVBoxLayout()
-        layout.addWidget(self.inputBar)
-        layout.addWidget(self.navigationButton)
-        layout.addWidget(self.browser)
+
+        layout = QGridLayout()
+        layout.addWidget(self.inputBar, 0, 2)
+        layout.addWidget(self.previousButton, 0, 0)
+        layout.addWidget(self.forwardButton, 0, 1)
+        layout.addWidget(self.browser, 1, 0, 2, 0)
 
         container = QWidget()
         container.setLayout(layout)
@@ -34,6 +41,14 @@ class browser(QMainWindow):
             text = "http://" + text
 
         self.browser.setUrl(QUrl(text))
+    
+    def previousPageMethod(self):
+        if self.browser.history().canGoBack():
+            self.browser.back()
+    
+    def forthPageMethod(self):
+        if self.browser.history().canGoForward():
+            self.browser.forward()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
