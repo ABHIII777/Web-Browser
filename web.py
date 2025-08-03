@@ -44,8 +44,6 @@ class browser(QMainWindow):
 
         layout.addWidget(self.tabs, 1, 0, 1, 4)
         
-        # layout.addWidget(self.browser, 3, 0, 1, 4)
-
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
