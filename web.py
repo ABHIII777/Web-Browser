@@ -10,9 +10,6 @@ class browser(QMainWindow):
         self.setWindowTitle("BROWSER")
         self.setGeometry(100, 100, 1200, 800)
 
-        self.browser = QWebEngineView()
-        self.browser.setUrl(QUrl("http://www.google.com"))
-
         self.inputBar = QLineEdit()
         self.inputBar.returnPressed.connect(self.navigationMethod)
 
@@ -53,15 +50,19 @@ class browser(QMainWindow):
         if not text.startswith("http://"):
             text = "http://" + text
 
-        self.browser.setUrl(QUrl(text))
+        currentBrowser = self.tabs.currentWidget()
+        currentBrowser.setUrl(QUrl(text))
+        
     
     def previousPageMethod(self):
-        if self.browser.history().canGoBack():
-            self.browser.back()
+        currentBrowser = self.tabs.currentWidget()
+        if currentBrowser.history().canGoBack():
+            currentBrowser.back()
     
     def forthPageMethod(self):
-        if self.browser.history().canGoForward():
-            self.browser.forward()
+        currentBrowser = self.tabs.currentWidget()
+        if currentBrowser.history().canGoForward():
+            currentBrowser.forward()
         
     def newTabMethod(self, url = None, label = "Blank"):
         if url is None:
