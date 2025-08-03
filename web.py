@@ -24,9 +24,15 @@ class browser(QMainWindow):
         self.forwardButton.clicked.connect(self.forthPageMethod)
         self.forwardButton.setFixedSize(60, 30)
 
-        self.newTabButton = QPushButton("Add")
-        self.newTabButton.setFixedSize(60, 30)
-        self.newTabButton.clicked.connect(self.newTabMethod)
+        self.tabs = QTabWidget()
+        self.tabs.setDocumentMode(True)
+
+        self.tabs.tabBarDoubleClicked.connect(lambda index: self.newTabMethod())
+        self.tabs.currentChanged.connect(self.currentTabChanged)
+        self.tabs.setTabsClosable(True)
+        self.tabs.tabCloseRequested.connect(self.closedCurrentTab)
+
+        self.newTabMethod()
 
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
@@ -35,9 +41,10 @@ class browser(QMainWindow):
         layout.addWidget(self.inputBar, 0, 3)
         layout.addWidget(self.previousButton, 0, 0)
         layout.addWidget(self.forwardButton, 0, 1)
-        layout.addWidget(self.newTabButton, 0, 2)
+
+        layout.addWidget(self.tabs, 1, 0, 1, 4)
         
-        layout.addWidget(self.browser, 3, 0, 1, 4)
+        # layout.addWidget(self.browser, 3, 0, 1, 4)
 
         container = QWidget()
         container.setLayout(layout)
@@ -58,8 +65,42 @@ class browser(QMainWindow):
         if self.browser.history().canGoForward():
             self.browser.forward()
         
-    def newTabMethod(self):
-        pass
+    def newTabMethod(self, url = None, label = "Blank"):
+        if url is None:
+            url = QUrl('https://www.google.com')
+
+        browser = QWebEngineView()
+
+        browser.setUrl(url)
+
+        i = self.tabs.addTab(browser, label)
+        self.tabs.setCurrentIndex(i)
+
+        browser.urlChanged.connect(lambda url, browser = browser: self.update_urlBar(url, browser))
+        browser.loadFinished.connect(lambda _, i = i, browser = browser: self.tabs.setTabText(i, browser.page().title()))
+    
+    def currentTabChanged(self, i):
+        url = self.tabs.currentWidget().url()
+        self.update_urlBar(url, self.tabs.currentWidget())
+        self.update_title(self.tabs.currentWidget())
+
+    def closedCurrentTab(self, i):
+        if self.tabs.count() < 2:
+            return
+        self.tabs.removeTab(i)
+    
+    def update_title(self, browser) :
+        if browser != self.tabs.currentWidget():
+            return
+        
+        title = self.tabs.currentWidget().page().title()
+        self.setWindowTitle("% s - Geek PyQt5" % title)
+    
+    def update_urlBar(self, q, browser = None):
+        if browser != self.tabs.currentWidget():
+            return
+        self.inputBar.setText(q.toString())
+        self.inputBar.setCursorPosition(0)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
